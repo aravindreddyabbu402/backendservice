@@ -1,0 +1,302 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { readFileSync } from 'fs';
+import { parse } from 'papaparse';
+import { DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
+import { Product } from './entities/products.entity';
+import { ProductVarient } from './entities/productvarient.entity';
+import { Brand } from 'src/brand/entities/brand.entity';
+import { BrandController } from 'src/brand/brand.controller';
+import { BrandService } from 'src/brand/brand.service';
+import { BrandModule } from 'src/brand/brand.module';
+
+@Injectable()
+export class ProductsService {
+  
+  
+  constructor(
+    @InjectRepository(Product)
+    private productsRepository: Repository<Product>,
+
+    @InjectRepository(Brand)
+    private brandRepository: Repository<Brand>,
+
+    
+   
+ 
+    @InjectRepository(ProductVarient)
+    private productvarientRepository: Repository<ProductVarient>
+  ) {}
+
+  /****************Products CRUD********************/
+
+
+  async findAllProducts(): Promise<Product[]> {
+    var products: Product[] = await this.productsRepository.find();
+    var productWithBrand: Product[] = [];
+  
+    for (var product of products) {
+      var brand: Brand = await BrandService.brandRepository.findOneBy({ brand_id: product.brand_id });
+      // product.push({
+      //   product_id: product.product_id,
+      //   cat_id: product.cat_id,
+      //   brand_id: product.brand_id,
+      //   product_name: product.product_name,
+      //   product_image: product.product_image,
+      //   type: product.type,
+      //   hide: product.hide,
+      //   added_by: product.added_by,
+      //   approved: product.approved,
+      //   admin_share: product.admin_share,
+      //   featured: product.featured,
+      //   brand: brand // include brand details
+      // });
+      product={...product,"brand": brand}
+    }
+  
+    return products;
+  }
+  
+
+
+  // findAllProducts(): Promise<Product[]> {
+  //   let result= this.productsRepository.find();
+  //   result = { ...result, this.brandRepository.findOneBy({ result.brand_id })};
+  //   return result;
+  // }
+
+
+  // findAllProducts(): Promise<Product[]> {
+  //   let result= this.productsRepository.find();
+  //   result = { ...result, this.brandRepository.findOneBy({ result.brand_id })};
+  //   return result;
+  // }
+
+
+  // async findAllProducts(): Promise<Product[]> {
+  //   var products = await this.productsRepository.find();
+  //   var result = await Promise.all(products.map(async (product) => {
+  //     var brand = await this.brandRepository.findOne({product.brand_id });
+  //     return { ...product, brand };
+  //   }));
+  //   return result;
+  // }
+
+
+  // findAllProducts(): Promise<Product[]> {
+  //   return this.productsRepository.find().then((products: Product[]) => {
+  //     var promises = products.map((product: Product) => {
+  //       return this.brandRepository.findOneOrFail(product.brand_id).then((brand: Brand) => {
+  //         product.brand = brand;
+  //         return product;
+  //       });
+  //     });
+  //     return Promise.all(promises);
+  //   });
+  // }
+  
+
+  // async findAllProducts(): Promise<Product[]> {
+  //   var products = await this.productsRepository.find();
+  //   var productBrandMap = new Map();
+  //   var brandIds = Array.from(new Set(products.map(p => p.brand_id)));
+    
+  //   var brands = await this.brandRepository.findByIds(brandIds);
+  //   brands.forEach(b => productBrandMap.set(b.brand_id, b));
+    
+  //   products.forEach(p => {
+  //     var brand = productBrandMap.get(p.brand_id);
+  //     p.brand = brand;
+  //   });
+    
+  //   return products;
+  // }
+  
+
+  // async findAllProducts(): Promise<Product[]> {
+  //   var products = await this.productsRepository.find();
+
+  //   for (var product of products) {
+  //     product.brand = await this.brandService.findOneBy(product.brand_id);
+  //   }
+
+  //   return products;
+  // }
+  
+
+
+  // async findAllProducts(): Promise<Product[]> {
+  //   var products = await this.productsRepository.find({
+  //     relations: ['brand'],
+  //   });
+  
+  //   // Create a new array with the modified product objects
+  //   var result = products.map((product) => {
+  //     var { brand, ...rest } = product;
+  //     return {
+  //       ...rest,
+  //       brand: brand || null,
+  //     };
+  //   });
+  
+  //   return result;
+  // }
+  
+
+  // findAllProducts(): Promise<Product[]> {
+  //   return this.productsRepository.find({
+  //     relations: ['brand']
+  //   });
+  // }
+
+  
+
+  // findAllProducts(): Promise<Product[]> {
+  //   return this.productsRepository.createQueryBuilder('product')
+  //     .leftJoinAndSelect('product.brand', 'brand')
+  //     .getMany();
+  // }
+  
+
+  // findAllProducts(): Promise<Product[]> {
+  //   return this.productsRepository
+  //     .createQueryBuilder('product')
+  //     .leftJoinAndSelect('product.brand', 'brand')
+  //     .getMany();
+  // }
+  
+
+
+
+  // findAllProducts(): Promise<Product[]> {
+  //   return this.productsRepository.find();
+  // }
+
+
+  findOneProduct(product_id: number): Promise<Product> {
+    return this.productsRepository.findOneBy({ product_id });
+  }
+
+  // findByBrand(brand_id: number): Promise<Product[]> {
+  //   return this.productsRepository.findBy({ brand_id });
+  // }
+
+  // async findByBrandWithDetails(brand_id: number): Promise<Product[]> {
+  //   return await this.productsRepository
+  //     .createQueryBuilder('product')
+  //     .leftJoinAndSelect('product.brand', 'brand')
+  //     .where('product.brand_id = :brand_id', { brand_id })
+  //     .getMany();
+  // }
+
+  async findByBrandWithDetails(brand_id: number): Promise<Product[]> {
+    return await this.productsRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.brand', 'brand')
+      .select(['product', 'brand.brand_id', 'brand.title', 'brand.slug', 'brand.url', 'brand.image', 'brand.parent', 'brand.level', 'brand.description', 'brand.status', 'brand.added_by', 'brand.tax_type', 'brand.tax_name', 'brand.tax_per', 'brand.tx_id', 'brand.hide'])
+      .where('product.brand_id = :brand_id', { brand_id })
+      .getMany();
+  }
+  
+
+  
+
+  
+
+  findByBrand(brand_id: number): Promise<Product[]> {
+    return this.productsRepository.find({
+      where: { brand_id },
+      relations: ['brand']
+    });
+  }
+  
+
+  findByCategory(cat_id: number): Promise<Product[]> {
+    return this.productsRepository.findBy({ cat_id });
+  }
+
+  getFeaturedProducts(): Promise<Product[]>{
+    return this.productsRepository.findBy({ "featured":1 })
+  }
+
+  
+
+
+  createProduct(product: Product): Promise<InsertResult> {
+    return this.productsRepository.insert(product);
+  }
+
+  async uploadProducts(file: Express.Multer.File): Promise<InsertResult>{
+    var csvFile = readFileSync('./files/Products.csv');
+    var products: Product[] = await parse(csvFile.toString(), {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: (header) => header.toLowerCase().replace('#', '').trim(),
+      complete: (results) => results.data
+    }).data
+    return this.productsRepository.insert(products);
+  }
+
+  async updateproduct(product_id: number, product: Product): Promise<UpdateResult> {
+    var productList: Product[] = await this.productsRepository.findBy({ product_id })
+    if(productList && productList.length){
+      return this.productsRepository.update(product_id, product);
+    }else{
+      return new Promise<UpdateResult>((resolve, reject) => {
+        //  resolve(null)
+      })
+    }
+  }
+
+  async removeProduct(product_id: number): Promise<DeleteResult> {
+    return await this.productsRepository.delete(product_id);
+  }
+
+  /****************ProductVarient CRUD********************/
+  findProductVarientsByProductId(product_id: number): Promise<ProductVarient[]> {
+    return this.productvarientRepository.findBy({ product_id });
+  }
+
+  findProductVarientByVarientId(varient_id: number): Promise<ProductVarient> {
+    return this.productvarientRepository.findOneBy({ varient_id });
+  }
+
+  createProductVarient(productVarient: ProductVarient): Promise<InsertResult> {
+    return this.productvarientRepository.insert(productVarient);
+  }
+
+  async uploadProductVarient(file: Express.Multer.File): Promise<InsertResult>{
+    var csvFile = readFileSync('./files/ProductVarient.csv');
+    var productVarient: ProductVarient[] = await parse(csvFile.toString(), {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: (header) => header.toLowerCase().replace('#', '').trim(),
+      complete: (results) => results.data
+    }).data
+    return this.productvarientRepository.insert(productVarient);
+  }
+
+  async updateProductVarient(varient_id: number, productVarient: ProductVarient): Promise<UpdateResult> {
+    var varientList: ProductVarient[] = await this.productvarientRepository.findBy({ varient_id })
+    if(varientList && varientList.length){
+      return this.productvarientRepository.update(varient_id, productVarient);
+    }else{
+      return new Promise<UpdateResult>((resolve, reject) => {
+         resolve(null)
+      })
+    }
+  }
+
+  async removeProductVarient(varient_id: number): Promise<DeleteResult> {
+    return await this.productvarientRepository.delete(varient_id);
+  }
+
+  
+
+  /********************Stock Availability************ */
+  getStockAvailablity(): Promise<ProductVarient[]>{
+    return this.productvarientRepository.find({ relations: {
+      product: true,
+  } });
+  }
+}

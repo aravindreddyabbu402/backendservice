@@ -1,0 +1,128 @@
+  // async generateOTP(mb: number): Promise<any> {
+  //   const otpLength = 6; 
+  //   // Length of the OTP
+  //   const digits = '0123456789';
+  //   let otp = '';
+  
+  //   for (let i = 0; i < otpLength; i++) {
+  //     otp += digits[Math.floor(Math.random() * 10)];
+  //   }
+  
+  //   const user = await this.userRepository
+  //   .createQueryBuilder('user')
+  //   .where('user.user_phone = :phone', { phone: mb })
+  //   .getOne();
+
+  //   if (user) {
+  //     user.otp_value = otp;
+  //     await this.userRepository.save(user);
+  //   }
+  //   setTimeout(async ()=>{
+  //   var az= await this.userRepository.find();
+  //   for(var aq of  az)
+  //   if(aq.user_phone==JSON.stringify(mb)) {
+  //   aq.otp_value='';
+  //   this.userRepository.save(aq);
+  // }
+
+  //   }, 2*60*1000);
+  //   return otp;
+  // }
+
+
+  
+// async generateOTP(mb: number): Promise<any> {
+//   const otpLength = 6;
+//   const digits = '0123456789';
+//   let otp = '';
+
+//   for (let i = 0; i < otpLength; i++) {
+//     otp += digits[Math.floor(Math.random() * 10)];
+//   }
+
+//   const user = await this.userRepository
+//     .createQueryBuilder('user')
+//     .where('user.user_phone = :phone', { phone: mb })
+//     .getOne();
+
+//   if (user) {
+//     user.otp_value = otp;
+//     await this.userRepository.save(user);
+//   }
+// let otp_msg=`your otp is ${otp}`;
+// this.twilioNotification.send(user.user_phone, otp_msg);
+
+
+//   setTimeout(async () => {
+//     const az = await this.userRepository.find();
+//     for (const aq of az) {
+//       if (aq.user_phone === JSON.stringify(mb)) {
+//         aq.otp_value = '';
+//         this.userRepository.save(aq);
+//       }
+//     }
+//   }, 2 * 60 * 1000);
+
+//   return "otp sent";
+// }
+  
+
+
+// async verifyOTP(user_phone: number, otp: string): Promise<string> {
+//   const user = await this.userRepository
+//     .createQueryBuilder('user')
+//     .where('user.user_phone = :phone', { phone: user_phone })
+//     .getOne();
+
+//   if (user && user.otp_value === otp) {
+//     // OTP is valid
+//     user.otp_value = ''; // Clear OTP value
+//     await this.userRepository.save(user);
+//     this.twilioNotification.send(user.user_phone, "OTP verification successful");
+//     return "OTP verification successful";
+//   } else {
+//     // OTP is invalid or user not found
+//      this.twilioNotification.send(user.user_phone, "OTP verification failed");
+//     return "OTP verification failed";
+//   }
+// }
+
+/*
+
+async generateOTP(mb: string): Promise<any> {
+  const otpLength = 6;
+  const digits = '0123456789';
+  let otp = '';
+
+  for (let i = 0; i < otpLength; i++) {
+    otp += digits[Math.floor(Math.random() * 10)];
+  }
+
+  const user = await this.userRepository
+    .createQueryBuilder('user')
+    .where('user.user_phone = :phone', { phone: mb })
+    .getOne();
+
+  if (user) {
+    const hashedOTP = await bcrypt.hash(otp, 10); // Hash the OTP value
+    user.otp_value = hashedOTP;
+    await this.userRepository.save(user);
+  }
+
+  let otp_msg = `your otp is ${otp}`;
+  this.twilioNotification.send(user.user_phone, otp_msg);
+
+  setTimeout(async () => {
+    const az = await this.userRepository.find();
+    for (const aq of az) {
+      if (aq.user_phone === JSON.stringify(mb)) {
+        aq.otp_value = '';
+        this.userRepository.save(aq);
+      }
+    }
+  }, 2 * 60 * 1000);
+
+  return "otp sent";
+}
+
+*/

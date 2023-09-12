@@ -1,0 +1,12 @@
+{
+    "type": "mariadb",
+    "host": "localhost",
+    "port": 4306,
+    "username": "root",
+    "password": "root",
+    "database": "db1",
+    "entities": ["src/products/entities/.ts", "src/brand/entities/.ts"],
+    "synchronize": true,
+    "logging": true,
+    "lazy": false 
+  }

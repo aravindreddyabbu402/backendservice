@@ -1,0 +1,12 @@
+ login remove id, name and otp based auth
+add logging of request api's by users - done
+filterng based on ctegory, brand, pricing, etc
+remove expiresIn jwt - on logout you should expire tooken - done
+mmake device id blank after logout - done
+user creation pemissions based on role
+push notifications
+
+
+stores, cart, orders - data addiiton
+successful order flow - SMS, Email notification - done
+productVariant - bulk upload - done
